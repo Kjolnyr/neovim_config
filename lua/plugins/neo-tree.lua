@@ -19,6 +19,5 @@ return {
         width = 25
       }
     })
-    vim.keymap.set('n', '<A-p>', ':Neotree toggle<CR>', {})
   end
 }
