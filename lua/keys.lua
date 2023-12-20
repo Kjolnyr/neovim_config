@@ -16,6 +16,17 @@ kmap('n', '<M-q>', ":q<CR>", 'Close current buffer')
 kmap('n', '<M-h>', ":vne<CR>", 'Open a new window to the right')
 kmap('n', '<M-v>', ":new<CR>", 'Open a new window below')
 
+kmap('n', '<C-Up>', '<C-w>k', 'Go to the window above')
+kmap('n', '<C-Down>', '<C-w>j', 'Go to the window below')
+kmap('n', '<C-Left>', '<C-w>h', 'Go to the window on the left')
+kmap('n', '<C-Right>', '<C-w>l', 'Go to the window on the right')
+
+kmap('n', '<C-M-Up>', ':res +2<CR>', 'Increase window verical size')
+kmap('n', '<C-M-Down>', ':res -2<CR>', 'Decrease window verical size')
+kmap('n', '<C-M-Left>', ':vert res -5<CR>', 'Decrease window horizontal size')
+kmap('n', '<C-M-Right>', ':vert res +5<CR>', 'Increase window horizontal size')
+
+
 -- tabs
 kmap('n', '<M-t>', ":tabnew<CR>", 'Open a new tab')
 kmap('n', '<M-Left>', ":tabprevious<CR>", 'Go to previous tab')
@@ -44,7 +55,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local opts = { buffer = ev.buf }
     kmap('n', 'gD', vim.lsp.buf.declaration, 'Go to declaration', opts)
     kmap('n', 'gd', vim.lsp.buf.definition, 'Go to definition', opts)
-    kmap('n', 'K', vim.lsp.buf.hover, 'LSP Hover', opts)
+    kmap('n', 'D', vim.lsp.buf.hover, 'LSP Hover', opts)
     kmap('n', 'gi', vim.lsp.buf.implementation, 'Go to implementation', opts)
     kmap('n', '<C-k>', vim.lsp.buf.signature_help, 'Signature help', opts)
     kmap('n', '<space>wa', vim.lsp.buf.add_workspace_folder, 'Add workspace folder', opts)

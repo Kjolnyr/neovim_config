@@ -14,17 +14,67 @@ return {
     'simrat39/rust-tools.nvim'
   },
   config = function()
+    require("neodev").setup()
     local lspconfig = require('lspconfig')
-    lspconfig.pyright.setup {}
-    lspconfig.tsserver.setup {}
-    lspconfig.rust_analyzer.setup {
-      settings = {
-        ['rust-analyzer'] = {},
-      }
+
+    local handlers = {
+      ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+        silent = true,
+        border = 'rounded',
+      }),
+      ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = 'rounded' }),
+    }
+
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+    capabilities.textDocument.foldingRange = {
+      dynamicRegistration = false,
+      lineFoldingOnly = true,
     }
 
 
-    require("neodev").setup()
-    
+    lspconfig.pyright.setup {
+      capabilities = capabilities,
+      handlers = handlers,
+    }
+    lspconfig.tailwindcss.setup {
+      capabilities = capabilities,
+      handlers = handlers,
+    }
+    lspconfig.tsserver.setup {
+      capabilities = capabilities,
+      handlers = handlers,
+    }
+    lspconfig.rust_analyzer.setup {
+      capabilities = capabilities,
+      handlers = handlers,
+      settings = {
+        ['rust-analyzer'] = {
+          cachePriming = {
+            enable = false
+          },
+          imports = {
+            granularity = {
+              group = "module",
+            },
+            prefix = "self",
+          },
+          cargo = {
+            buildScripts = {
+              enable = true,
+            },
+          },
+          procMacro = {
+            enable = true,
+          },
+        },
+      }
+    }
+
+    vim.api.nvim_create_autocmd("CursorHoldI", {
+      pattern = "*",
+      callback = vim.lsp.buf.signature_help
+    })
+
   end
 }
