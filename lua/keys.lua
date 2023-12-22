@@ -53,10 +53,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Buffer local mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
+    kmap('n', 'D', vim.lsp.buf.hover, 'LSP Hover', opts)
     kmap('n', 'gD', vim.lsp.buf.declaration, 'Go to declaration', opts)
     kmap('n', 'gd', vim.lsp.buf.definition, 'Go to definition', opts)
-    kmap('n', 'D', vim.lsp.buf.hover, 'LSP Hover', opts)
     kmap('n', 'gi', vim.lsp.buf.implementation, 'Go to implementation', opts)
+    kmap('n', 'gr', vim.lsp.buf.references, 'Go to references', opts)
     kmap('n', '<C-k>', vim.lsp.buf.signature_help, 'Signature help', opts)
     kmap('n', '<space>wa', vim.lsp.buf.add_workspace_folder, 'Add workspace folder', opts)
     kmap('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, 'Remove workspace folder', opts)
@@ -66,7 +67,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     kmap('n', '<space>D', vim.lsp.buf.type_definition, '', opts)
     kmap('n', '<space>rn', vim.lsp.buf.rename, 'Rename current element', opts)
     kmap({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, 'Code action', opts)
-    kmap('n', 'gr', vim.lsp.buf.references, 'Go to references', opts)
     kmap('n', '<space>f', function()
       vim.lsp.buf.format { async = true }
     end, 'Format file', opts)

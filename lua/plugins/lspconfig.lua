@@ -1,8 +1,9 @@
 return {
   'neovim/nvim-lspconfig',
+  event = {'BufReadPre', 'BufNewFile'},
   dependencies = {
     -- Automatically install LSPs to stdpath for neovim
-    'williamboman/mason.nvim',
+    {'williamboman/mason.nvim', cmd = 'Mason', build = ':MasonUpdate'},
     'williamboman/mason-lspconfig.nvim',
 
     -- Useful status updates for LSP
@@ -13,68 +14,110 @@ return {
     'folke/neodev.nvim',
     'simrat39/rust-tools.nvim'
   },
-  config = function()
-    require("neodev").setup()
-    local lspconfig = require('lspconfig')
-
-    local handlers = {
-      ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-        silent = true,
-        border = 'rounded',
-      }),
-      ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = 'rounded' }),
-    }
-
-    local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-    capabilities.textDocument.foldingRange = {
-      dynamicRegistration = false,
-      lineFoldingOnly = true,
-    }
-
-
-    lspconfig.pyright.setup {
-      capabilities = capabilities,
-      handlers = handlers,
-    }
-    lspconfig.tailwindcss.setup {
-      capabilities = capabilities,
-      handlers = handlers,
-    }
-    lspconfig.tsserver.setup {
-      capabilities = capabilities,
-      handlers = handlers,
-    }
-    lspconfig.rust_analyzer.setup {
-      capabilities = capabilities,
-      handlers = handlers,
-      settings = {
-        ['rust-analyzer'] = {
-          cachePriming = {
-            enable = false
-          },
-          imports = {
-            granularity = {
-              group = "module",
-            },
-            prefix = "self",
-          },
-          cargo = {
-            buildScripts = {
-              enable = true,
+  opts = {
+        servers = {
+          tsserver = {
+            settings = {
+              typescript = {
+                inlayHints = {
+                  includeInlayParameterNameHints = "literal",
+                  includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                  includeInlayFunctionParameterTypeHints = false,
+                  includeInlayVariableTypeHints = false,
+                  includeInlayPropertyDeclarationTypeHints = false,
+                  includeInlayFunctionLikeReturnTypeHints = true,
+                  includeInlayEnumMemberValueHints = true,
+                },
+              },
+              javascript = {
+                inlayHints = {
+                  includeInlayParameterNameHints = "all",
+                  includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                  includeInlayFunctionParameterTypeHints = true,
+                  includeInlayVariableTypeHints = true,
+                  includeInlayPropertyDeclarationTypeHints = true,
+                  includeInlayFunctionLikeReturnTypeHints = true,
+                  includeInlayEnumMemberValueHints = true,
+                },
+              },
             },
           },
-          procMacro = {
-            enable = true,
+          lua_ls = {
+            settings = { Lua = { diagnostics = { globals = { "vim" } } } },
           },
+          tailwindcss = {
+            settings = {
+              tailwindCSS = {
+                experimental = {
+                  classRegex = {
+                    { "cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]" },
+                  },
+                },
+              },
+            },
+          },
+          rust_analyzer = {
+            settings = {
+              ['rust-analyzer'] = {
+                cachePriming = {
+                  enable = false
+                },
+                imports = {
+                  granularity = {
+                    group = "module",
+                  },
+                  prefix = "self",
+                },
+                cargo = {
+                  buildScripts = {
+                    enable = true,
+                  },
+                },
+                procMacro = {
+                  enable = true,
+                },
+              },
+            }
+          }
         },
-      }
+      },
+  config = function(_, opts)
+    require("neodev").setup()
+    require("mason").setup()
+    require("mason-lspconfig").setup {
+      ensure_installed = {"rust_analyzer", "tsserver", "pyright", "tailwindcss", "lua_ls", "eslint", "cssls"}
     }
+    local lsp_capabilities = vim.tbl_deep_extend(
+        "force",
+        {},
+        vim.lsp.protocol.make_client_capabilities(),
+        require("cmp_nvim_lsp").default_capabilities()
+      )
 
-    vim.api.nvim_create_autocmd("CursorHoldI", {
-      pattern = "*",
-      callback = vim.lsp.buf.signature_help
+    require("mason-lspconfig").setup_handlers({
+      function (server_name)
+        require('lspconfig')[server_name].setup {
+          capabilities = lsp_capabilities,
+          settings = opts.servers[server_name] and opts.servers[server_name].settings or {}
+        }
+      end
     })
-
+    vim.diagnostic.config({
+        underline = true,
+        update_in_insert = false,
+        virtual_text = {
+          spacing = 4,
+          source = "if_many",
+        },
+        severity_sort = true,
+        float = {
+          focusable = true,
+          style = "minimal",
+          border = "rounded",
+          source = "always",
+          header = "",
+          prefix = "",
+        },
+      })
   end
 }
